@@ -3,6 +3,7 @@ Fun with OpenCV and Python
 
 
 The main goal of this script is to :
+
 1. Open a photo of a Suduko Grid
 2. Filter and correct it (perspective correction, noise suppression...)
 3. Identify the grid
