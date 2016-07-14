@@ -12,3 +12,5 @@ The main goal of this script is to :
 6. Display the solution
 
 The libraries used are OpenCV2 and Numpy
+
+Despite my efforts, the OCR doesn't seem to be very accurate (50-60%), which is not enough for our application...
