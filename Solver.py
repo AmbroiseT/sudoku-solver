@@ -1,5 +1,5 @@
 import numpy as np
-
+import time
 
 def solve_grid(grid):
     """
@@ -17,8 +17,57 @@ def solve_grid(grid):
                         result = solve_grid(grid)
                         if result is not None:
                             return result
+                        grid[i][j]=0
                 return None
     return grid
+
+def solve_grid_opt(grid):
+    """
+    Solve a Sudoku grid
+    :param grid:
+    :return:
+    """
+    for i in range(9):
+        for j in range(9):
+            if grid[i][j] == 0:
+                poss = find_poss(grid, i, j)
+                if len(poss) == 0:
+                    return None
+                elif len(poss) == 1:
+                    grid[i][j] = poss[0]
+                else:
+                    for k in poss:
+                        grid[i][j] = k
+                        result = solve_grid(grid)
+                        if result is not None:
+                            return result
+                        grid[i][j] = 0
+                    return None
+    return grid
+
+def find_poss(grid, i, j):
+    """
+    Find all possible
+    :param grid:
+    :return:
+    """
+    if grid[i][j]==0:
+        poss = range(1, 10)
+
+        cornerI = i/3
+        cornerJ = j/3
+        for k in range(cornerI, cornerI+3):
+            for l in range(cornerJ, cornerJ+3):
+                if grid[k][l]!=0 and (k!=i or l!=j):
+                    poss.remove(grid[k][l])
+
+        for k in range(9):
+            if grid[i][k]!=0 and grid[i][k] in poss:
+                poss.remove(grid[i][k])
+            if grid[k][j]!= 0 and grid[k][j] in poss:
+                poss.remove(grid[k][j])
+
+        return poss
 
 
 def is_ok(grid):
@@ -61,5 +110,18 @@ grid = np.array([[3, 2, 0, 0, 8, 0, 0, 0, 0],
                  [5, 0, 4, 0, 0, 6, 0, 0, 0],
                  [0, 0, 0, 0, 9, 7, 0, 0, 0],
                  [0, 0, 0, 0, 5, 0, 0, 3, 6]], np.uint8)
+grid2 = np.array(grid, copy=True)
 
-print solve_grid(grid)
+start = time.time()
+res = solve_grid_opt(grid)
+end = time.time()
+print res
+print end-start
+
+
+start = time.time()
+res = solve_grid(grid2)
+end = time.time()
+print res
+print is_ok(res)
+print end-start
