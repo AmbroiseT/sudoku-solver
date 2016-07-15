@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import random
 import copy
+import Reader
 
 class DigitOCM:
     stockDim = 100
@@ -53,6 +54,39 @@ class DigitOCM:
                     self.samples = np.append(self.samples, sample, 0)
 
         self.save_training_data()
+
+    def train_from_grid(self, outputSamples="training/samples.data", outputResponses="training/responses.data"):
+        dimCase = self.stockDim
+        self.samples = np.empty((0,self.stockDim**2))
+        self.responses = []
+        for i in range(6, 10):
+            reader = Reader.Reader()
+            reader.load_image("data/sudokus/sudoku"+str(i)+".png")
+            reader.clean_image()
+            reader.rectify_perspective()
+            reader.cut_image_from_clean()
+            for img in reader.cases:
+                contours,hierarchy = cv2.findContours(copy.deepcopy(img),cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)
+                maxArea = -1
+                biggest = None
+                for ctn in contours:
+                    area = cv2.arcLength(ctn, True)
+                    if area>maxArea and area > 25:
+                        maxArea = area
+                        biggest = ctn
+                x,y,w,h = cv2.boundingRect(biggest)
+                img = img[y:y+h,x:x+w]
+
+                img = cv2.resize(img, (self.stockDim,self.stockDim))
+
+                img = img.reshape((1, img.size))
+                img = np.float32(img)
+
+                self.responses.append(i)
+                self.samples = np.append(self.samples, img, 0)
+
+
+
 
     def train_from_images(self, outputSamples="training/samples.data", outputResponses="training/responses.data"):
         dimCase = self.stockDim

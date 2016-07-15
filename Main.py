@@ -1,8 +1,5 @@
 from Reader import Reader
 from DigitOCM import DigitOCM
-import cv2
-import numpy as np
-import copy
 
 
 ocm = DigitOCM()
@@ -20,6 +17,8 @@ reader.clean_image()
 reader.rectify_perspective()
 reader.show_rectified()
 reader.cut_image_from_clean()
+
+
 reader.margin_cases()
 
 
