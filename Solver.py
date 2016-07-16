@@ -2,6 +2,7 @@ import numpy as np
 import time
 import copy
 
+
 def solve_grid(grid):
     """
     Solve a Sudoku grid
@@ -42,7 +43,6 @@ def solve_grid_best_util(grid, poss_grid):
     grid = np.array(grid, copy=True)
     poss_grid = copy.deepcopy(poss_grid)
 
-
     update_poss_matrix(grid, poss_grid)
     while solve_nrec(grid, poss_grid) :
         update_poss_matrix(grid, poss_grid)
@@ -62,9 +62,10 @@ def solve_grid_best_util(grid, poss_grid):
                         if result is not None:
                             return result
                         grid[i][j] = 0
-                    #return None
+                    return None
     print poss_grid
     return grid
+
 
 def update_poss_matrix(grid, poss_matrix):
     for i in range(9):
@@ -104,7 +105,7 @@ def solve_grid_opt(grid):
                 else:
                     for k in poss:
                         grid[i][j] = k
-                        result = solve_grid(grid)
+                        result = solve_grid_opt(grid)
                         if result is not None:
                             return result
                         grid[i][j] = 0
@@ -173,12 +174,12 @@ def is_ok(grid):
                 foundCol.append(col)
                 foundLi.append(li)
 
-    for i in range(0, 10, 3):
-        for j in range(0, 10, 3):
+    for i in range(3):
+        for j in range(3):
             found = []
             for k in range(3):
                 for l in range(3):
-                    case = grid[k][l]
+                    case = grid[k+i*3][l+j*3]
                     if case!=0 and case in found:
                         return False
                     else:
@@ -198,7 +199,7 @@ grid = np.array([[3, 2, 0, 0, 8, 0, 0, 0, 0],
 grid2 = np.array(grid, copy=True)
 
 start = time.time()
-res = solve_grid_best(grid)
+res = solve_grid(grid)
 end = time.time()
 print res
 print end-start

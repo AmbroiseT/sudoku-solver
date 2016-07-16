@@ -1,6 +1,6 @@
 from Reader import Reader
 from DigitOCR import DigitOCR
-
+from Solver import solve_grid
 
 ocm = DigitOCR()
 
@@ -26,4 +26,6 @@ reader.margin_cases()
 mat = reader.convert_to_matrix(ocm)
 print mat
 
+print "Searching for a solution..."
+print solve_grid(mat)
 
