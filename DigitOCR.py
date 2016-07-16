@@ -3,6 +3,8 @@ import numpy as np
 import random
 import copy
 import Reader
+import Image
+from pytesseract import image_to_string
 
 class DigitOCR:
     stockDim = 100
@@ -167,6 +169,16 @@ class DigitOCR:
         sample = roi.reshape((1, self.stockDim**2))
         self.samples = np.append(self.samples, sample, 0)
 
+    def read_image_tesseract(self,img):
+        img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
+        pil_img = Image.fromarray(img)
+        
+        result = image_to_string(pil_img, config="-psm 10 -c tessedit_char_whitelist=123456789")
+        print result
+        try:
+            return int(result)
+        except ValueError:
+            return 0
 
     def read_image(self, img):
         percent = (cv2.countNonZero(img)*100.0)/img.size

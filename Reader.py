@@ -107,7 +107,7 @@ class Reader:
         assert isinstance(trainer, DigitOCR)
         matrix = np.zeros((9,9))
         for i in range(81):
-            matrix[i/9][i%9] = trainer.read_image(self.cases[i])
+            matrix[i/9][i%9] = trainer.read_image_tesseract(self.cases[i])
         return matrix
 
     def margin_cases(self):
@@ -117,7 +117,7 @@ class Reader:
             margin = dim*0.15
             minX = int(margin*2)
             maxX = int(dim - margin)
-            minY = int(margin)
+            minY = int(margin*2)
             maxY = int(dim-margin)
             case = case[minY:maxY,minX:maxX]
             self.cases[i] = case
