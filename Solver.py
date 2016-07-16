@@ -27,6 +27,8 @@ def solve_grid_opt(grid):
     :param grid:
     :return:
     """
+    grid = np.array(grid, copy=True)
+    solve_nrec(grid)
     for i in range(9):
         for j in range(9):
             if grid[i][j] == 0:
@@ -44,6 +46,19 @@ def solve_grid_opt(grid):
                         grid[i][j] = 0
                     return None
     return grid
+
+def solve_nrec(grid):
+    """
+    Solve all that can be solved without recursion
+    :param grid:
+    :return:
+    """
+    for i in range(9):
+        for j in range(9):
+            if grid[i][j]==0:
+                poss = find_poss(grid, i, j)
+                if len(poss) == 1:
+                    grid[i][j] = poss[0]
 
 def find_poss(grid, i, j):
     """
@@ -118,10 +133,11 @@ end = time.time()
 print res
 print end-start
 
-
+'''
 start = time.time()
 res = solve_grid(grid2)
 end = time.time()
 print res
 print is_ok(res)
 print end-start
+'''
