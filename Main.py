@@ -1,8 +1,8 @@
 from Reader import Reader
-from DigitOCM import DigitOCM
+from DigitOCR import DigitOCR
 
 
-ocm = DigitOCM()
+ocm = DigitOCR()
 
 ocm.create_training_data()
 ocm.train()

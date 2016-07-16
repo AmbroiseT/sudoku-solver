@@ -4,7 +4,7 @@ import random
 import copy
 import Reader
 
-class DigitOCM:
+class DigitOCR:
     stockDim = 100
     def __init__(self):
         self.model = cv2.KNearest()

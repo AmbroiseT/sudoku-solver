@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import copy
-from DigitOCM import DigitOCM
+from DigitOCR import DigitOCR
 
 class Reader:
     """
@@ -104,7 +104,7 @@ class Reader:
         :param trainer DigitOCM trainer. Assumed to be already trained
         :return:
         """
-        assert isinstance(trainer, DigitOCM)
+        assert isinstance(trainer, DigitOCR)
         matrix = np.zeros((9,9))
         for i in range(81):
             matrix[i/9][i%9] = trainer.read_image(self.cases[i])
