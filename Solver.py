@@ -1,5 +1,6 @@
 import numpy as np
 import time
+import copy
 
 def solve_grid(grid):
     """
@@ -20,6 +21,69 @@ def solve_grid(grid):
                         grid[i][j]=0
                 return None
     return grid
+
+
+def solve_grid_best(grid):
+    """
+    Solve a Sudoku Grid
+    :param grid:
+    :return:
+    """
+    poss_grid = []
+    for i in range(9):
+        poss_grid.append([])
+        for j in range(9):
+            poss_grid[i].append(range(1,10))
+
+    return solve_grid_best_util(grid, poss_grid)
+
+
+def solve_grid_best_util(grid, poss_grid):
+    grid = np.array(grid, copy=True)
+    poss_grid = copy.deepcopy(poss_grid)
+
+
+    update_poss_matrix(grid, poss_grid)
+    while solve_nrec(grid, poss_grid) :
+        update_poss_matrix(grid, poss_grid)
+
+    for i in range(9):
+        for j in range(9):
+            if grid[i][j] == 0:
+                poss = poss_grid[i][j]
+                if len(poss) == 0:
+                    return None
+                elif len(poss) == 1:
+                    grid[i][j] = poss[0]
+                else:
+                    for p in poss:
+                        grid[i][j] = p
+                        result = solve_grid_best_util(grid, poss_grid)
+                        if result is not None:
+                            return result
+                        grid[i][j] = 0
+                    #return None
+    print poss_grid
+    return grid
+
+def update_poss_matrix(grid, poss_matrix):
+    for i in range(9):
+        for j in range(9):
+            if grid[i][j] == 0:
+                poss = poss_matrix[i][j]
+                cornerI = (i/3)*3
+                cornerJ = (j/3)*3
+                for k in range(cornerI, cornerI+3):
+                    for l in range(cornerJ, cornerJ+3):
+                        if grid[k][l]!=0 and (k!=i or l!=j) and grid[k][l] in poss:
+                            poss.remove(grid[k][l])
+
+                for k in range(9):
+                    if grid[i][k]!=0 and grid[i][k] in poss:
+                        poss.remove(grid[i][k])
+                    if grid[k][j]!= 0 and grid[k][j] in poss:
+                        poss.remove(grid[k][j])
+
 
 def solve_grid_opt(grid):
     """
@@ -47,18 +111,24 @@ def solve_grid_opt(grid):
                     return None
     return grid
 
-def solve_nrec(grid):
+def solve_nrec(grid, poss_mat=None):
     """
     Solve all that can be solved without recursion
     :param grid:
     :return:
     """
+    found = False
     for i in range(9):
         for j in range(9):
             if grid[i][j]==0:
-                poss = find_poss(grid, i, j)
+                if poss_mat is None:
+                    poss = find_poss(grid, i, j)
+                else:
+                    poss = poss_mat[i][j]
                 if len(poss) == 1:
                     grid[i][j] = poss[0]
+                    found = True
+    return found
 
 def find_poss(grid, i, j):
     """
@@ -69,8 +139,8 @@ def find_poss(grid, i, j):
     if grid[i][j]==0:
         poss = range(1, 10)
 
-        cornerI = i/3
-        cornerJ = j/3
+        cornerI = (i/3)*3
+        cornerJ = (j/3)*3
         for k in range(cornerI, cornerI+3):
             for l in range(cornerJ, cornerJ+3):
                 if grid[k][l]!=0 and (k!=i or l!=j):
@@ -128,10 +198,13 @@ grid = np.array([[3, 2, 0, 0, 8, 0, 0, 0, 0],
 grid2 = np.array(grid, copy=True)
 
 start = time.time()
-res = solve_grid_opt(grid)
+res = solve_grid_best(grid)
 end = time.time()
 print res
 print end-start
+print is_ok(grid)
+
+
 
 '''
 start = time.time()
