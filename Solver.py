@@ -61,14 +61,17 @@ def solve_grid_best_util(grid, poss_grid):
                             return result
                         grid[i][j] = 0
                     return None
-    print poss_grid
-    return grid
+    if is_ok(grid):
+        return grid
+    else:
+        return None
 
 
 def update_poss_matrix(grid, poss_matrix):
     for i in range(9):
         for j in range(9):
             if grid[i][j] == 0:
+                #poss_matrix[i][j] = find_poss(grid, i, j)
                 poss = poss_matrix[i][j]
                 cornerI = (i/3)*3
                 cornerJ = (j/3)*3
@@ -82,6 +85,7 @@ def update_poss_matrix(grid, poss_matrix):
                         poss.remove(grid[i][k])
                     if grid[k][j]!= 0 and grid[k][j] in poss:
                         poss.remove(grid[k][j])
+
 
 
 def solve_grid_opt(grid):
@@ -142,7 +146,7 @@ def find_poss(grid, i, j):
         cornerJ = (j/3)*3
         for k in range(cornerI, cornerI+3):
             for l in range(cornerJ, cornerJ+3):
-                if grid[k][l]!=0 and (k!=i or l!=j):
+                if grid[k][l]!=0 and (k!=i or l!=j) and grid[k][l] in poss:
                     poss.remove(grid[k][l])
 
         for k in range(9):
@@ -196,14 +200,13 @@ grid = np.array([[3, 2, 0, 0, 8, 0, 0, 0, 0],
                  [0, 0, 0, 0, 5, 0, 0, 3, 6]], np.uint8)
 grid2 = np.array(grid, copy=True)
 
+
 start = time.time()
-res = solve_grid_opt(grid)
+res = solve_grid(grid)
 end = time.time()
 print res
 print end-start
 print is_ok(res)
-
-
 
 '''
 start = time.time()

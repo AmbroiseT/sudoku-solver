@@ -1,6 +1,6 @@
 from Reader import Reader
 from DigitOCR import DigitOCR
-from Solver import solve_grid_best
+from Solver import solve_grid_opt
 
 ocm = DigitOCR()
 
@@ -27,5 +27,5 @@ mat = reader.convert_to_matrix(ocm)
 print mat
 
 print "Searching for a solution..."
-print solve_grid_best(mat)
+print solve_grid_opt(mat)
 
