@@ -53,8 +53,6 @@ def solve_grid_best_util(grid, poss_grid):
                 poss = poss_grid[i][j]
                 if len(poss) == 0:
                     return None
-                elif len(poss) == 1:
-                    grid[i][j] = poss[0]
                 else:
                     for p in poss:
                         grid[i][j] = p
@@ -199,11 +197,11 @@ grid = np.array([[3, 2, 0, 0, 8, 0, 0, 0, 0],
 grid2 = np.array(grid, copy=True)
 
 start = time.time()
-res = solve_grid(grid)
+res = solve_grid_opt(grid)
 end = time.time()
 print res
 print end-start
-print is_ok(grid)
+print is_ok(res)
 
 
 
