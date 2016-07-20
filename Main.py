@@ -4,8 +4,8 @@ from Solver import solve_grid_opt
 
 ocm = DigitOCR()
 
-ocm.create_training_data()
-ocm.train()
+#ocm.create_training_data()
+#ocm.train()
 
 
 reader = Reader()

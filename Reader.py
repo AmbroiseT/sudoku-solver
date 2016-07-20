@@ -53,7 +53,7 @@ class Reader:
         Corrects the perspective of img
         :return:
         """
-        contours, hierachy = cv2.findContours(copy.deepcopy(self.img), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        contours, hierachy = cv2.findContours(copy.deepcopy(self.img), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)[-2:]
 
         biggest = None
         max = -1

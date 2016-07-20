@@ -3,13 +3,14 @@ import numpy as np
 import random
 import copy
 import Reader
-import Image
+from PIL import Image
 from pytesseract import image_to_string
 
 class DigitOCR:
     stockDim = 100
     def __init__(self):
-        self.model = cv2.KNearest()
+        #self.model = cv2.KNearest()
+        pass
 
     def save_training_data(self, outputSamples="training/samples.data", outputResponses="training/responses.data"):
         responses_to_save = np.array(self.responses, np.float32)
