@@ -6,7 +6,7 @@ import scipy.io as sio
 
 train_size = 9
 image_size = 28
-image_new_size = 10
+image_new_size = 20
 
 
 def sigmoid(mat):
@@ -206,37 +206,42 @@ hidden_dim = 25
 input_size = 400
 num_labels = 10
 
-#oX, oy = load_every_xy_onevsall(10, 3)
-#X = oX
-#y = oy
-
+oX, oy = load_every_xy_onevsall(10, 3)
+X = oX
+y = oy
+'''
 mat = sio.loadmat("ex4data1.mat")
-X = mat['X'][:10]
-y = createMatrixFromY(mat['y'])[:10]
-
+X = mat['X']
+y = createMatrixFromY(mat['y'])[:400]
+Xval = mat['X'][400:500]
+yval = createMatrixFromY(mat['y'])[400:500]
+'''
+'''
 bob = sio.loadmat('ex4weights.mat')
 theta0, theta1 = bob['Theta1'], bob['Theta2']
 ThetaBob = np.append(np.ndarray.flatten(theta0, order='F'), np.ndarray.flatten(theta1, order='F'))
+'''
 
-
-epsilon_init = 0.0012
+epsilon_init = 1
 theta0 = epsilon_init*2*np.random.random((X.shape[1]+1,hidden_dim))-epsilon_init
 theta1 = epsilon_init*2*np.random.random((hidden_dim+1,y.shape[1]))-epsilon_init
 Theta = np.append(np.ndarray.flatten(theta0, order='F'), np.ndarray.flatten(theta1, order='F'))
+
 #print theta1.shape
 #Theta = ThetaBob
 
 #Theta = np.concatenate([np.reshape(theta0, ((X.shape[1]+1)*hidden_dim, 1)), np.reshape(theta1, ((hidden_dim+1)*y.shape[1], 1))])
-
+'''
 print(nn_costfunction(Theta, input_size, hidden_dim, num_labels, X, y, 1))
-print(nn_gradient(Theta, input_size, hidden_dim, num_labels, X, y, 0.1)[:100])
+print(nn_gradient(Theta, input_size, hidden_dim, num_labels, X, y, 0.1))
+'''
 #print(relativeDiff(nn_gradient(Theta, input_size, hidden_dim, num_labels, X, y, 0), grad_check(nn_costfunction, Theta, args=( input_size, hidden_dim, num_labels, X, y, 0))))
-print(grad_check(nn_costfunction, Theta, args=(input_size, hidden_dim, num_labels, X, y, 0.1))[:100])
+#print(grad_check(nn_costfunction, Theta, args=(input_size, hidden_dim, num_labels, X, y, 0.1))[:100])
 
 
 
 
-optTheta = scipy.optimize.fmin_cg(nn_costfunction, Theta, maxiter=400, args=( input_size, hidden_dim, num_labels, X, y, 0), fprime=nn_gradient)
+optTheta = scipy.optimize.fmin_cg(nn_costfunction, Theta, maxiter=1000, args=( input_size, hidden_dim, num_labels, X, y, 1), fprime=nn_gradient)
 #optTheta = scipy.optimize.fmin(nn_costfunction, Theta, maxiter=400, args=( input_size, hidden_dim, num_labels, X, y, 1))
 
 Xtest, ytest = X, y
