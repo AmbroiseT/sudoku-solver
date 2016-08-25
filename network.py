@@ -4,7 +4,7 @@ import scipy
 import scipy.optimize
 import scipy.io as sio
 
-train_size = 9
+train_size = 70
 image_size = 28
 image_new_size = 20
 
@@ -28,8 +28,6 @@ def predict(nn_params, input_layer_size, hidden_layer_size, num_labels, X):
     z2 = np.dot(a1, theta1.T)
     a2 = sigmoid(z2)
     
-    
-    #a1 = np.vstack((np.ones([1,a1.shape[1]]),a1)) 
     a2 = np.append(np.ones([a1.shape[0], 1]),a2, 1) #Add bias
 
     z3 = a2.dot(theta2.T)
@@ -37,7 +35,7 @@ def predict(nn_params, input_layer_size, hidden_layer_size, num_labels, X):
     return h
 
 def load_x_for_val(val, m):
-    img = cv2.imread("data/mnist_train"+str(val)+".jpg", cv2.IMREAD_GRAYSCALE)
+    img = cv2.imread("back/mnist_train"+str(val)+".jpg", cv2.IMREAD_GRAYSCALE)
     i = np.array(range(train_size))
     product = np.transpose([np.tile(i, len(i)), np.repeat(i, len(i))])
     np.random.shuffle(product)
@@ -65,7 +63,6 @@ def nn_costfunction(nn_params, *args):
     a2 = sigmoid(z2)
     
     
-    #a1 = np.vstack((np.ones([1,a1.shape[1]]),a1)) 
     a2 = np.append(np.ones([a1.shape[0], 1]),a2, 1) #Add bias
 
     z3 = a2.dot(theta2.T)
@@ -79,7 +76,6 @@ def nn_costfunction(nn_params, *args):
             J = J + (-(valueY)*np.log(h[row][k]) - (1-valueY)*np.log(1-h[row][k]))
     J = (1/float(m))*J
     J = J + (lam/float(2*m)) *(np.sum(np.square(theta1[:][2:]))+np.sum(np.square(theta2[:][2:])))
-    #print J
     return J
     
 def nn_gradient(nn_params, *args):
@@ -98,7 +94,6 @@ def nn_gradient(nn_params, *args):
     
     
     a2 = sigmoid(z2)
-    #a1 = np.vstack((np.ones([1,a1.shape[1]]),a1)) 
     a2 = np.append(np.ones([a1.shape[0], 1]),a2, 1) #Add bias
 
     z3 = a2.dot(theta2.T)
@@ -173,8 +168,6 @@ def load_every_xy_onevsall(m, val):
     contentY = []
     for i in range(10):
         x = load_x_for_val(i, m)
-        #y = 1 if i==val else 0
-        #y = np.array([y]*m)
         y = [0]*10
         y[i] = 1 
         y = np.array([y]*m)    
@@ -182,12 +175,9 @@ def load_every_xy_onevsall(m, val):
         contentY.append(y)
     X = np.concatenate(contentX)
     Y = np.concatenate(contentY)
-    #Y = np.reshape(Y, (m*10, 1))
     return X, Y
 
 def relativeDiff(x, xref):
-    #x = np.square(x)
-    #xref = np.square(xref)
     return (x-xref)/xref
 
 def createMatrixFromY(y):
@@ -197,74 +187,59 @@ def createMatrixFromY(y):
         valY = [0]*10
         valY[value] = 1
         contentY.append(np.array([valY]))
-        #print "{} ==> {}".format(value, valY)
     Y = np.concatenate(contentY)
     return Y
         
 #Dimension of the hidden layer:
-hidden_dim = 25
+hidden_dim = 200
 input_size = 400
 num_labels = 10
+lam = 6
 
-oX, oy = load_every_xy_onevsall(10, 3)
+oX, oy = load_every_xy_onevsall(400, 3)
 X = oX
 y = oy
-'''
-mat = sio.loadmat("ex4data1.mat")
-X = mat['X']
-y = createMatrixFromY(mat['y'])[:400]
-Xval = mat['X'][400:500]
-yval = createMatrixFromY(mat['y'])[400:500]
-'''
-'''
-bob = sio.loadmat('ex4weights.mat')
-theta0, theta1 = bob['Theta1'], bob['Theta2']
-ThetaBob = np.append(np.ndarray.flatten(theta0, order='F'), np.ndarray.flatten(theta1, order='F'))
-'''
 
 epsilon_init = 1
 theta0 = epsilon_init*2*np.random.random((X.shape[1]+1,hidden_dim))-epsilon_init
 theta1 = epsilon_init*2*np.random.random((hidden_dim+1,y.shape[1]))-epsilon_init
 Theta = np.append(np.ndarray.flatten(theta0, order='F'), np.ndarray.flatten(theta1, order='F'))
 
-#print theta1.shape
-#Theta = ThetaBob
-
-#Theta = np.concatenate([np.reshape(theta0, ((X.shape[1]+1)*hidden_dim, 1)), np.reshape(theta1, ((hidden_dim+1)*y.shape[1], 1))])
 '''
 print(nn_costfunction(Theta, input_size, hidden_dim, num_labels, X, y, 1))
 print(nn_gradient(Theta, input_size, hidden_dim, num_labels, X, y, 0.1))
 '''
-#print(relativeDiff(nn_gradient(Theta, input_size, hidden_dim, num_labels, X, y, 0), grad_check(nn_costfunction, Theta, args=( input_size, hidden_dim, num_labels, X, y, 0))))
-#print(grad_check(nn_costfunction, Theta, args=(input_size, hidden_dim, num_labels, X, y, 0.1))[:100])
+
+#optTheta = Theta
+optTheta = np.loadtxt("optTheta.txt")
 
 
+iters = 200
+for i in range(0, iters, 100):
+    iters-=100
+    optTheta = scipy.optimize.fmin_cg(nn_costfunction, optTheta, maxiter=100, args=( input_size, hidden_dim, num_labels, X, y, lam), fprime=nn_gradient)
+
+optTheta = scipy.optimize.fmin_cg(nn_costfunction, optTheta, maxiter=iters, args=( input_size, hidden_dim, num_labels, X, y, lam), fprime=nn_gradient)
 
 
-optTheta = scipy.optimize.fmin_cg(nn_costfunction, Theta, maxiter=1000, args=( input_size, hidden_dim, num_labels, X, y, 1), fprime=nn_gradient)
-#optTheta = scipy.optimize.fmin(nn_costfunction, Theta, maxiter=400, args=( input_size, hidden_dim, num_labels, X, y, 1))
+result = predict(optTheta, input_size, hidden_dim, num_labels, X)
+good = 0
+total = X.shape[0]
+for index, pred in enumerate(result):    
+    if np.argmax(pred) == np.argmax(y[index]):
+        good+=1
+    
+print "Accuracy in training set : {}".format(float(good)/total)
 
-Xtest, ytest = X, y
-#Xtest, ytest = load_every_xy_onevsall(10, 3)
+
+Xtest, ytest = load_every_xy_onevsall(50, 3)
 result = predict(optTheta, input_size, hidden_dim, num_labels, Xtest)
 good = 0
 total = Xtest.shape[0]
 for index, pred in enumerate(result):    
-    #print("res = {}".format(pred))
-    #print "Prediction n {} : ".format(index)    
-    #print np.argmax(pred)
-    #print np.argmax(ytest[index])
     if np.argmax(pred) == np.argmax(ytest[index]):
         good+=1
-    
-print "Accuracy in validation set 10 iter : {}".format(float(good)/total)
+print "Accuracy in validation set : {}".format(float(good)/total)
 
+np.savetxt("optTheta.txt", optTheta)
 
-'''
-accuracy = evaluate_accuracy(10, theta0, theta1)
-print( accuracy)
-'''
-'''
-toPredict = np.array([ [1,1,1] ])
-print predict(toPredict, theta0, theta1)
-'''
