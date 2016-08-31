@@ -108,6 +108,7 @@ class Reader:
         matrix = np.zeros((9,9))
         for i in range(81):
             matrix[i/9][i%9] = trainer.read_image_tesseract(self.cases[i])
+            #matrix[i/9][i%9] = trainer.read_image_network(self.cases[i])
         return matrix
 
     def margin_cases(self):

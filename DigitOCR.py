@@ -5,12 +5,13 @@ import copy
 import Reader
 from PIL import Image
 from pytesseract import image_to_string
+import network
 
 class DigitOCR:
     stockDim = 100
     def __init__(self):
         #self.model = cv2.KNearest()
-        pass
+		self.theta = None
 
     def save_training_data(self, outputSamples="training/samples.data", outputResponses="training/responses.data"):
         responses_to_save = np.array(self.responses, np.float32)
@@ -180,6 +181,12 @@ class DigitOCR:
             return int(result)
         except ValueError:
             return 0
+    
+    def read_image_network(self, img):
+		if self.theta is None:
+			self.theta = network.load_theta()
+		
+		return network.predict_from_image(img, self.theta)
 
     def read_image(self, img):
         percent = (cv2.countNonZero(img)*100.0)/img.size

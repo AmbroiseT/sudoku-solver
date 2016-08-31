@@ -7,6 +7,11 @@ import scipy.io as sio
 train_size = 70
 image_size = 28
 image_new_size = 20
+#Dimension of the hidden layer:
+hidden_dim = 200
+input_size = 400
+num_labels = 10
+lam = 6
 
 
 def sigmoid(mat):
@@ -190,38 +195,55 @@ def createMatrixFromY(y):
     Y = np.concatenate(contentY)
     return Y
         
-#Dimension of the hidden layer:
-hidden_dim = 200
-input_size = 400
-num_labels = 10
-lam = 6
 
-oX, oy = load_every_xy_onevsall(400, 3)
-X = oX
-y = oy
 
-epsilon_init = 1
-theta0 = epsilon_init*2*np.random.random((X.shape[1]+1,hidden_dim))-epsilon_init
-theta1 = epsilon_init*2*np.random.random((hidden_dim+1,y.shape[1]))-epsilon_init
-Theta = np.append(np.ndarray.flatten(theta0, order='F'), np.ndarray.flatten(theta1, order='F'))
+def train_network():
+	oX, oy = load_every_xy_onevsall(1000, 3)
+	X = oX
+	y = oy
+
+	epsilon_init = 1
+	theta0 = epsilon_init*2*np.random.random((X.shape[1]+1,hidden_dim))-epsilon_init
+	theta1 = epsilon_init*2*np.random.random((hidden_dim+1,y.shape[1]))-epsilon_init
+	Theta = np.append(np.ndarray.flatten(theta0, order='F'), np.ndarray.flatten(theta1, order='F'))
+
+
+	#optTheta = Theta
+	optTheta = np.loadtxt("optTheta.txt")
+
+
+	iters = 400
+	for i in range(0, iters, 100):
+		iters-=100
+		optTheta = scipy.optimize.fmin_cg(nn_costfunction, optTheta, maxiter=100, args=( input_size, hidden_dim, num_labels, X, y, lam), fprime=nn_gradient)
+
+	optTheta = scipy.optimize.fmin_cg(nn_costfunction, optTheta, maxiter=iters, args=( input_size, hidden_dim, num_labels, X, y, lam), fprime=nn_gradient)
+	
+	return optTheta
+	
+def load_theta(file_name="optTheta.txt"):
+	return np.loadtxt(file_name)
+	
+def predict_from_image(image, theta):
+	image = cv2.resize(image, (image_new_size, image_new_size))
+	X = np.matrix(np.ones((1, image_new_size**2)))
+	X[0] = image.flatten()
+	result = predict(theta, input_size, hidden_dim, num_labels, X)
+	return np.argmax(result[0])
+	
+def evaluate_theta(theta):
+	Xtest, ytest = load_every_xy_onevsall(50, 3)
+	result = predict(optTheta, input_size, hidden_dim, num_labels, Xtest)
+	good = 0
+	total = Xtest.shape[0]
+	for index, pred in enumerate(result):    
+		if np.argmax(pred) == np.argmax(ytest[index]):
+			good+=1
+	print "Accuracy in validation set : {}".format(float(good)/total)
+	
+#optTheta = load_theta()
 
 '''
-print(nn_costfunction(Theta, input_size, hidden_dim, num_labels, X, y, 1))
-print(nn_gradient(Theta, input_size, hidden_dim, num_labels, X, y, 0.1))
-'''
-
-#optTheta = Theta
-optTheta = np.loadtxt("optTheta.txt")
-
-
-iters = 200
-for i in range(0, iters, 100):
-    iters-=100
-    optTheta = scipy.optimize.fmin_cg(nn_costfunction, optTheta, maxiter=100, args=( input_size, hidden_dim, num_labels, X, y, lam), fprime=nn_gradient)
-
-optTheta = scipy.optimize.fmin_cg(nn_costfunction, optTheta, maxiter=iters, args=( input_size, hidden_dim, num_labels, X, y, lam), fprime=nn_gradient)
-
-
 result = predict(optTheta, input_size, hidden_dim, num_labels, X)
 good = 0
 total = X.shape[0]
@@ -230,16 +252,9 @@ for index, pred in enumerate(result):
         good+=1
     
 print "Accuracy in training set : {}".format(float(good)/total)
+'''
 
 
-Xtest, ytest = load_every_xy_onevsall(50, 3)
-result = predict(optTheta, input_size, hidden_dim, num_labels, Xtest)
-good = 0
-total = Xtest.shape[0]
-for index, pred in enumerate(result):    
-    if np.argmax(pred) == np.argmax(ytest[index]):
-        good+=1
-print "Accuracy in validation set : {}".format(float(good)/total)
 
-np.savetxt("optTheta.txt", optTheta)
+#np.savetxt("optTheta.txt", optTheta)
 
