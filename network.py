@@ -129,6 +129,46 @@ def nn_gradient(nn_params, *args):
     
     return grad
 
+def nn_gradient_vect(nn_params, *args):
+    input_layer_size, hidden_layer_size, num_labels, X, y, lam = args[0], args[1], args[2], args[3], args[4], args[5]
+    
+
+    theta1 = np.array(nn_params[0:(input_layer_size+1)*hidden_layer_size])
+    theta2 = np.array(nn_params[(input_layer_size+1)*hidden_layer_size:])
+    theta1 = theta1.reshape((hidden_layer_size, input_layer_size+1), order='F')
+    theta2 = theta2.reshape((num_labels, hidden_layer_size+1), order='F')
+    m = X.shape[0]
+    X = np.hstack((np.ones([m,1]),X))
+    
+    a1 = X
+    z2 = X.dot(theta1.T) 
+    
+    
+    a2 = sigmoid(z2)
+    a2 = np.append(np.ones([a1.shape[0], 1]),a2, 1) #Add bias
+
+    z3 = a2.dot(theta2.T)
+    h = sigmoid(z3)
+
+    Theta1_grad = np.zeros(theta1.shape)
+    Theta2_grad = np.zeros(theta2.shape)
+   
+    delta3 = h-y
+    
+    delta2  = np.dot(theta2.T,delta3.T)*(np.append(np.ones((m, 1)), sigmoidGradient(z2), 1)).T
+    delta2 = delta2[1:]
+	
+    Theta1_grad += (np.dot(delta2,a1))
+    Theta2_grad += np.dot(delta3.T, a2)
+        
+    #Regularize gradient
+    Theta2_grad = (1/float(m))*Theta2_grad + (float(lam)/m)*theta2
+    Theta1_grad = (1/float(m))*Theta1_grad + (float(lam)/m)*theta1
+
+    grad = np.append(np.ndarray.flatten(Theta1_grad, order='F'), np.ndarray.flatten(Theta2_grad, order='F'))
+    
+    return grad
+
 def grad_check(costfunc, theta, args):
     numgrad = np.zeros(theta.shape)
     perturb = np.zeros(theta.shape)
@@ -198,7 +238,7 @@ def createMatrixFromY(y):
 
 
 def train_network():
-	oX, oy = load_every_xy_onevsall(1000, 3)
+	oX, oy = load_every_xy_onevsall(4000, 3)
 	X = oX
 	y = oy
 
@@ -215,9 +255,11 @@ def train_network():
 	iters = 400
 	for i in range(0, iters, 100):
 		iters-=100
-		optTheta = scipy.optimize.fmin_cg(nn_costfunction, optTheta, maxiter=100, args=( input_size, hidden_dim, num_labels, X, y, lam), fprime=nn_gradient)
+		optTheta = scipy.optimize.fmin_cg(nn_costfunction, optTheta, maxiter=100, args=( input_size, hidden_dim, num_labels, X, y, lam), fprime=nn_gradient_vect)
 
-	optTheta = scipy.optimize.fmin_cg(nn_costfunction, optTheta, maxiter=iters, args=( input_size, hidden_dim, num_labels, X, y, lam), fprime=nn_gradient)
+	optTheta = scipy.optimize.fmin_cg(nn_costfunction, optTheta, maxiter=iters, args=( input_size, hidden_dim, num_labels, X, y, lam), fprime=nn_gradient_vect)
+	
+	np.savetxt("optTheta.txt", optTheta)
 	
 	return optTheta
 	
@@ -233,7 +275,7 @@ def predict_from_image(image, theta):
 	
 def evaluate_theta(theta):
 	Xtest, ytest = load_every_xy_onevsall(50, 3)
-	result = predict(optTheta, input_size, hidden_dim, num_labels, Xtest)
+	result = predict(theta, input_size, hidden_dim, num_labels, Xtest)
 	good = 0
 	total = Xtest.shape[0]
 	for index, pred in enumerate(result):    
@@ -241,20 +283,13 @@ def evaluate_theta(theta):
 			good+=1
 	print "Accuracy in validation set : {}".format(float(good)/total)
 	
-#optTheta = load_theta()
+#theta = load_theta()
 
 '''
-result = predict(optTheta, input_size, hidden_dim, num_labels, X)
-good = 0
-total = X.shape[0]
-for index, pred in enumerate(result):    
-    if np.argmax(pred) == np.argmax(y[index]):
-        good+=1
-    
-print "Accuracy in training set : {}".format(float(good)/total)
+theta = train_network()
+evaluate_theta(theta)
 '''
-
-
 
 #np.savetxt("optTheta.txt", optTheta)
+
 
